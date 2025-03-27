@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    # Add custom annotations for tracking
+    kubernetes.io/change-cause: "Version upgrade"
+spec:
+  progressDeadlineSeconds: 600  # 10 minutes max rollout time
+  minReadySeconds: 30  # Wait time after pod becomes ready
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 25%
+  template:
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: your-container
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          failureThreshold: 30
+          periodSeconds: 10
+
+
+
+helm upgrade [RELEASE_NAME] [CHART] \
+  --install \
+  --atomic \
+  --wait \
+  --timeout 15m \
+  --debug \
+  --render-subchart-notes \
+  --force
